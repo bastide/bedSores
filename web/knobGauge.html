@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<head>
+    <title>MQTT Client with google charts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="js/mqttws31.js" type="text/javascript"> /* global Paho */</script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"> /* global google */</script>
+    <script type="text/javascript">
+
+        var connectionInfo = {
+            host: "test.mosquitto.org",
+            port: 8080,
+            clientID: "knobGaugeClient",
+            topic: "bastide/grove/potentiometer"
+        };
+
+        // On charge le widget google
+        google.charts.load('current', {'packages': ['gauge']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            // Initialisation du widget
+            var data = google.visualization.arrayToDataTable([
+                ['Label', 'Value'],
+                ['Knob', 80]
+            ]);
+
+            var options = {
+                width: 400, height: 120,
+                redFrom: 90, redTo: 100,
+                yellowFrom: 75, yellowTo: 90,
+                minorTicks: 5
+            };
+
+            var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+            chart.draw(data, options);
+
+            // Connection au broker mqtt
+            var client = new Paho.MQTT.Client(connectionInfo.host, connectionInfo.port, connectionInfo.clientID);
+            client.onConnectionLost = onConnectionLost;
+            client.onMessageArrived = onMessageArrived;
+            client.connect({onSuccess: onConnect});
+
+            function onConnect() {
+                // Once a connection has been made, make a subscription 
+                console.log("Connected, subscribing.");
+                client.subscribe(connectionInfo.topic);
+            }
+
+            function onConnectionLost(responseObject) {
+                if (responseObject.errorCode !== 0)
+                    console.log("onConnectionLost:" + responseObject.errorMessage);
+            }
+
+            function onMessageArrived(message) {
+                var payLoad = message.payloadString;
+                console.log("Message arrived, topic:" + message.destinationName + ", value: " + message.payloadString);
+                data.setValue(0, 1, parseInt(payLoad));
+                chart.draw(data, options);
+            }
+        }
+
+    </script>    
+</head>
+<body>    
+    <h1>MQTT client whith Google charts visualization</h1>
+    This client connects to the MQTT server at:
+    <pre><script> document.write(connectionInfo.host);</script></pre> 
+    and subscribes to the topic: 
+    <pre><script> document.write(connectionInfo.topic);</script></pre>
+    Publish value to <script> document.write(connectionInfo.topic);</script>, e.g.<br>
+    <pre>mosquitto_pub -h <script> document.write(connectionInfo.host);</script> -p <script> document.write(connectionInfo.port);</script> -t <script> document.write(connectionInfo.topic);</script> -m 75</pre><br>
+    or use the web client at : <a href="http://www.hivemq.com/demos/websocket-client/">http://www.hivemq.com/demos/websocket-client/</a>
+    <ul>
+        <li><a href="https://developers.google.com/chart/interactive/docs/gallery">Google charts documentation</a></li>
+        <li><a href="http://www.eclipse.org/paho/files/jsdoc/index.html">javascript MQTT documentation</a></li>
+    </ul>
+
+    <div id="chart_div" style="width: 400px; height: 120px;"></div>
+</body>
+
