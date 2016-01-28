@@ -26,9 +26,10 @@
             ]);
 
             var options = {
+                max : 1000,
                 width: 400, height: 120,
-                redFrom: 90, redTo: 100,
-                yellowFrom: 75, yellowTo: 90,
+                redFrom: 900, redTo: 1000,
+                yellowFrom: 750, yellowTo: 900,
                 minorTicks: 5
             };
 
@@ -70,7 +71,7 @@
     <pre><script> document.write(connectionInfo.topic);</script></pre>
     Publish value to <script> document.write(connectionInfo.topic);</script>, e.g.<br>
     <pre>mosquitto_pub -h <script> document.write(connectionInfo.host);</script> -p <script> document.write(connectionInfo.port);</script> -t <script> document.write(connectionInfo.topic);</script> -m 75</pre><br>
-    or use the web client at : <a href="http://www.hivemq.com/demos/websocket-client/">http://www.hivemq.com/demos/websocket-client/</a>
+    or use the web client at : <a href="http://www.hivemq.com/demos/websocket-client/" target="_blank">http://www.hivemq.com/demos/websocket-client/</a>
     <ul>
         <li><a href="https://developers.google.com/chart/interactive/docs/gallery">Google charts documentation</a></li>
         <li><a href="http://www.eclipse.org/paho/files/jsdoc/index.html">javascript MQTT documentation</a></li>
